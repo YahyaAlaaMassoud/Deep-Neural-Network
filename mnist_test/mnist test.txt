@@ -1,0 +1,37 @@
+l r 0.3
+epochs 100
+h u 100
+train acc 90.34
+test acc 90.9
+---------------
+l r 0.3
+epochs 100
+h u 120
+train acc 90.63
+test acc 91.4
+---------------
+l r 0.3
+epochs 140
+h u 140
+train acc 91.65
+test acc 91.92
+---------------
+l r 0.3
+epochs 140
+h u 200
+train acc 91.69
+test acc 92.26
+---------------
+l r 0.3
+epochs 140
+h u 392
+train acc 92.05
+test acc 92.48
+---------------
+l r 0.3
+epochs 200
+h u 120, 150
+train acc 94.46
+test acc 94.26
+---------------
+
