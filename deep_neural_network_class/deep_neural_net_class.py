@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from helper_functions import sigmoid, relu, sigmoid_derivative, relu_derivative
 
 class DNN():
-    def __init__(self, X, Y, layers_dims, learning_rate, epochs, print_cost = True, print_every = 100, plot = True, initialization = 'he', lambd = 0.1, dropout = 0.):
+    def __init__(self, X, Y, layers_dims, learning_rate, epochs, print_cost = True, print_every = 100, plot = True, initialization = 'he', lambd = 0.1, dropout = 0., activations = None):
         self.__X = X
         self.__Y = Y
         self.__layers_dims = layers_dims
@@ -17,6 +17,12 @@ class DNN():
         self.__lambd = lambd
         self.__dropout = dropout
         self.__D = {}
+        self.__activations = activations
+        if activations == None:
+            self.__activations = []
+            for i in range(len(layers_dims) - 2):
+                self.__activations.append("relu")
+            self.__activations.append("sigmoid")
         
     def get_params(self):
         return self.__parameters
@@ -93,9 +99,9 @@ class DNN():
         L = len(parameters) // 2    
         for l in range(1, L):
             A_prev = A 
-            A, cache = self.activate_forward(A_prev, parameters['W' + str(l)], parameters['b' + str(l)], activation = "relu")
+            A, cache = self.activate_forward(A_prev, parameters['W' + str(l)], parameters['b' + str(l)], activation = self.__activations[l - 1])
             caches.append(cache)
-        AL, cache = self.activate_forward(A, parameters['W' + str(L)], parameters['b' + str(L)], activation = "sigmoid")
+        AL, cache = self.activate_forward(A, parameters['W' + str(L)], parameters['b' + str(L)], activation = self.__activations[L - 1])
         caches.append(cache)
         return AL, caches
     
@@ -108,8 +114,8 @@ class DNN():
     def linear_backward(self, dZ, cache):
         A_prev, W, b = cache
         m = A_prev.shape[1]
-        dW = 1./m * np.dot(dZ,A_prev.T)
-        db = 1./m * np.sum(dZ, axis = 1, keepdims = True)
+        dW = (1./m) * np.dot(dZ,A_prev.T)
+        db = (1./m) * (np.sum(dZ, axis = 1, keepdims = True))
         dA_prev = np.dot(W.T,dZ)
         return dA_prev, dW, db
     
@@ -117,10 +123,9 @@ class DNN():
         linear_cache, activation_cache = cache
         if activation == "relu":
             dZ = relu_derivative(dA, activation_cache)
-            dA_prev, dW, db = self.linear_backward(dZ, linear_cache)
         elif activation == "sigmoid":
             dZ = sigmoid_derivative(dA, activation_cache)
-            dA_prev, dW, db = self.linear_backward(dZ, linear_cache)
+        dA_prev, dW, db = self.linear_backward(dZ, linear_cache)
         return dA_prev, dW, db
     
     def backward_prop(self, AL, Y, caches):
@@ -130,11 +135,11 @@ class DNN():
         Y = Y.reshape(AL.shape)
         dAL = - (np.divide(Y, AL) - np.divide(1 - Y, 1 - AL))
         current_cache = caches[L-1]
-        grads["dA" + str(L)], grads["dW" + str(L)], grads["db" + str(L)] = self.activate_backward(dAL, current_cache, activation = "sigmoid")
+        grads["dA" + str(L)], grads["dW" + str(L)], grads["db" + str(L)] = self.activate_backward(dAL, current_cache, activation = self.__activations[L - 1])
         
         for l in reversed(range(L-1)):
             current_cache = caches[l]
-            dA_prev_temp, dW_temp, db_temp = self.activate_backward(grads["dA" + str(l + 2)], current_cache, activation = "relu")
+            dA_prev_temp, dW_temp, db_temp = self.activate_backward(grads["dA" + str(l + 2)], current_cache, activation = self.__activations[l])
             grads["dA" + str(l + 1)] = dA_prev_temp
             grads["dW" + str(l + 1)] = dW_temp
             grads["db" + str(l + 1)] = db_temp
@@ -152,10 +157,10 @@ class DNN():
         m = X.shape[1]
         p = np.zeros((y.shape[0],m))
         probas,_ = self.forward_prop(X, parameters)
-        maxs = np.amax(probas, axis = 0)
+#        maxs = np.amax(probas, axis = 0)
         for i in range(0, probas.shape[1]):
             for j in range(0, probas.shape[0]):
-                if probas[j,i] == maxs[i]:
+                if probas[j,i] >= 0.5:
                     p[j,i] = 1
                 else:
                     p[j,i] = 0
