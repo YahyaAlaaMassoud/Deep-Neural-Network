@@ -134,6 +134,7 @@ class DNN():
         m = AL.shape[1]
         Y = Y.reshape(AL.shape)
         dAL = - (np.divide(Y, AL) - np.divide(1 - Y, 1 - AL))
+#        dAL =  (np.mean(AL - Y) ** 2)
         current_cache = caches[L-1]
         grads["dA" + str(L)], grads["dW" + str(L)], grads["db" + str(L)] = self.activate_backward(dAL, current_cache, activation = self.__activations[L - 1])
         

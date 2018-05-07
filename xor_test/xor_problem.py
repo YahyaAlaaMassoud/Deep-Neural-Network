@@ -12,7 +12,7 @@ Y_train = Y_train.reshape(1, 4)
 
 num_iterations = 20000
 learning_rate = 0.8
-layers_dims = [2, 3, 1]
+layers_dims = [2, 2, 1]
 
 model = DNN(X_train, Y_train, layers_dims, learning_rate, num_iterations, plot = True, print_every = 1000,
             initialization = 'he', activations = ["sigmoid", "sigmoid"])
